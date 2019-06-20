@@ -1,27 +1,52 @@
 //
 // Created by Shaw on 2019-06-18.
 //
+#ifndef HUFFMANCODING_H
+#define HUFFMANCODING_H
+#endif
+using namespace std;
 
-#ifndef HUFFMANCODING_HUFFMANCODING_H
-#define HUFFMANCODING_HUFFMANCODING_H
-#endif //HUFFMANCODING_HUFFMANCODING_H
+#define MAX 128
 
+typedef char ElemType;              //元素类型char
 
-//哈夫曼二叉树节点
-typedef struct HTNode {
-    int             weight;     //节点权值
-    unsigned int    code;       //节点哈夫曼编码
-    char            data;       //原始数据
-    struct HTNode   *parent,    //父节点
-                    *lchild,    //左子节点
-                    *rchild;    //右子节点
-} HTNode, *HuffmanTree;
+struct HTNode {
+    ElemType data;                  //字符
+    int weight;                     //权重
+    string code;                    //解码结果
+    HTNode *parent, *left, *right;
 
-
-class Haffman {
-
-public:
-    //合并两个节点为一个二叉树
-    HuffmanTree MergeNode(HuffmanTree N1, HuffmanTree N2);
-
+    //初始化结构体
+    HTNode() {
+        parent = left = right = nullptr;
+        code = "";
+        weight = 0;
+    }
 };
+
+//编码表
+typedef struct CodingTable {
+    ElemType data;
+    const char *code;
+} CodingTable;
+
+//定义指针比较函数
+struct PCmp {
+    bool operator()(HTNode const *x, HTNode const *y) {
+        return x->weight > y->weight;
+    }
+};
+
+int ReadFile(HTNode HashTable[], string path);
+
+void CreatForest(HTNode *HT[], HTNode HashTable[]);
+
+void CreatHuffmanTree(HTNode *HT[], int n);
+
+void HuffmanCode(HTNode *HT[], int n);
+
+void ShowCode(HTNode *HT[], int len);
+
+void SaveCode(HTNode *HT[], int len, string path);
+
+void DeCode(string path);

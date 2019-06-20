@@ -1,33 +1,37 @@
 #include <iostream>
-//#include "HuffmanCoding.h"
-#include "Tools.h"
+#include "HuffmanCoding.h"
 
 using namespace std;
 
+int main(int args, char **argv) {
+    //获取运行路径
+    string path = argv[0];
+    cout << path << endl;
 
-int main() {
-    ElemNode *HashTable = new ElemNode[128];
+    path = "/Users/Shaw/Desktop";
 
-    int len = ReadFile(HashTable, "/Users/Shaw/Workspace/C++/HuffmanCoding/doc/article.txt");
+    //创建哈希表统计ascii码的个数
+    HTNode *HashTable = new HTNode[128];
 
+    //读取文件，统计字符个数，初始化哈希表
+    int len = ReadFile(HashTable, "../text/article.txt");
 
+    //去除哈希表中权重为0的字符，重新建立森林
+    HTNode *HT[len];
+    CreatForest(HT, HashTable);
 
-    int j = 0;
-    ElemNode *ElemArr = new ElemNode[len];
+    CreatHuffmanTree(HT, len);
 
-    for (int i = 0; i < 128; i++) {
-        if (HashTable[i].count > 0) {
-            ElemArr[j].data = HashTable[i].data;
-            ElemArr[j].count = HashTable[i].count;
-            j++;
-        }
-    }
-    CreateHeap(ElemArr, len);
+    HuffmanCode(HT, len);
 
-    for (int i = 0; i < len; i++) {
+    ShowCode(HT, len);
 
-        cout << ElemArr[i].data << " " << ElemArr[i].count << endl;
+    SaveCode(HT, len, path);
 
-    }
+    DeCode(path);
+
 
 }
+
+
+
