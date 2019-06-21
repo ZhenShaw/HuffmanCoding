@@ -39,9 +39,9 @@ struct PCmp {
 
 int ReadFile(HTNode HashTable[], string path);
 
-void CreatForest(HTNode *HT[], HTNode HashTable[]);
+void CreateForest(HTNode **HT, HTNode *HashTable);
 
-void CreatHuffmanTree(HTNode *HT[], int n);
+void CreateHuffmanTree(HTNode **HT, int n);
 
 void HuffmanCode(HTNode *HT[], int n);
 

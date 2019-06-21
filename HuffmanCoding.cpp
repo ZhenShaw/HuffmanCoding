@@ -31,7 +31,7 @@ int ReadFile(HTNode HashTable[], string path) {
 }
 
 
-void CreatForest(HTNode *HT[], HTNode HashTable[]) {
+void CreateForest(HTNode **HT, HTNode *HashTable) {
     //去除权重为0的字符，重新建立森林
     int j = 0;
     for (int i = 0; i < MAX; i++) {
@@ -52,10 +52,10 @@ void CreatForest(HTNode *HT[], HTNode HashTable[]) {
 priority_queue<HTNode *, vector<HTNode *>, PCmp> Heap;    //最小堆结构
 
 //构造HuffmanTree
-void CreatHuffmanTree(HTNode *Forest[], int n) {
+void CreateHuffmanTree(HTNode **HT, int n) {
     //创建小根堆
     for (int i = 0; i < n; i++) {
-        Heap.push(Forest[i]);
+        Heap.push(HT[i]);
     }
     HTNode *parent;
     HTNode *s1, *s2;
@@ -86,7 +86,7 @@ void CreatHuffmanTree(HTNode *Forest[], int n) {
     }
 }
 
-//Huffman编码
+
 void HuffmanCode(HTNode *HT[], int n) {
     for (int i = 0; i < n; i++) {
         HTNode *cur = HT[i];
@@ -96,9 +96,9 @@ void HuffmanCode(HTNode *HT[], int n) {
         //沿着指针路径读取编码
         while (parent != nullptr) {    //到达根节点的时候解码结束
             if (parent->left == cur)
-                code += "0";
+                code = "0" + code;
             else
-                code += "1";
+                code = "1" + code;
 
             //结点向上一层
             cur = parent;
@@ -111,10 +111,9 @@ void HuffmanCode(HTNode *HT[], int n) {
 
 //保存文件
 void SaveCode(HTNode *HT[], int len, string path) {
-    if (path == "")path = ".";
-    ofstream fCode(path + "/result.dat", ios::out | ios::binary);
-    ofstream fTable(path + "/table.dat", ios::out | ios::binary);
-    ifstream fOrigin(path + "/article.txt", ios::in);
+    ofstream fCode("./result.dat", ios::out | ios::binary);
+    ofstream fTable("./table.dat", ios::out | ios::binary);
+    ifstream fOrigin("./article.txt", ios::in);
     if (!fOrigin.is_open()) {
         cout << "源文档打开失败！\n";
         return;
@@ -139,12 +138,16 @@ void SaveCode(HTNode *HT[], int len, string path) {
     cout << "\n保存编码结果和编码表完成!" << endl;
     cout << "编码结果文件：" + path + "/result.dat" << endl;
     cout << "编码表文件：" + path + "/table.dat" << endl;
+
+    fCode.close();
+    fTable.close();
+    fOrigin.close();
 }
 
 void DeCode(string path) {
-    ifstream fCode(path + "/result.dat", ios::in | ios::binary);
-    ifstream fTable(path + "/table.dat", ios::binary);
-    ofstream fRec(path + "/recovery.txt", ios::out);
+    ifstream fCode("./result.dat", ios::in | ios::binary);
+    ifstream fTable("./table.dat", ios::binary);
+    ofstream fRec("./recovery.txt", ios::out);
     if (!fCode.is_open() || !fTable.is_open()) {
         cout << "编码文件或编码表打开失败！\n";
         return;
@@ -172,7 +175,12 @@ void DeCode(string path) {
     }
     cout << "\n解码完成!" << endl;
     cout << "解码文件：" + path + "/recovery.txt" << endl;
+
+    fCode.close();
+    fTable.close();
+    fRec.close();
 }
+
 
 //遍历统计结果
 void ShowCode(HTNode *Forest[], int len) {
