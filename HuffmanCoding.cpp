@@ -111,22 +111,46 @@ void HuffmanCode(HTNode *HT[], int n) {
 
 //保存文件
 void SaveCode(HTNode *HT[], int len, string path) {
-    ofstream fCode("./result.dat", ios::out | ios::binary);
-    ofstream fTable("./table.dat", ios::out | ios::binary);
-    ifstream fOrigin("./article.txt", ios::in);
+    ofstream fCode("result.dat", ios::out | ios::binary);
+    ofstream fTable("table.dat", ios::out | ios::binary);
+    ifstream fOrigin("article.txt", ios::in);
     if (!fOrigin.is_open()) {
         cout << "源文档打开失败！\n";
         return;
     }
-    //写入编码结果
+    //以二进制形式写入编码结果
     char ch;
+    unsigned char buff = NULL; //临时存储
+    int bitLen = 0;
     while (fOrigin.get(ch)) {
         for (int i = 0; i < len; i++) {
             if (ch == HT[i]->data) {
-                fCode.write(HT[i]->code.c_str(), HT[i]->code.length());
+                for (int j = 0; j < HT[i]->code.length(); j++) {
+
+                    buff = buff << 1; //左移1位
+
+                    if (HT[i]->code[j] == '0')
+                        buff = buff | 0;  //或运算
+                    else
+                        buff = buff | 1;
+
+                    bitLen++;
+                    if (bitLen == 8) {    //八位凑够一个字节写入文件
+                        fCode.write((char *) &buff, 1);
+                        bitLen = 0;
+                        buff = NULL;
+                    }
+                }
             }
         }
     }
+
+    //最后的buff不满8位无法写入，此处补0，有小bug
+    for (int i = 0; i < 8 - bitLen; i++) {
+        buff = buff << 1; //左移1位
+    }
+    fCode.write((char *) &buff, 1);
+
 
     //写入编码表
     for (int i = 0; i < len; i++) {
@@ -145,9 +169,9 @@ void SaveCode(HTNode *HT[], int len, string path) {
 }
 
 void DeCode(string path) {
-    ifstream fCode("./result.dat", ios::in | ios::binary);
-    ifstream fTable("./table.dat", ios::binary);
-    ofstream fRec("./recovery.txt", ios::out);
+    ifstream fCode("result.dat", ios::in | ios::binary);
+    ifstream fTable("table.dat", ios::binary);
+    ofstream fRec("recovery.txt", ios::out);
     if (!fCode.is_open() || !fTable.is_open()) {
         cout << "编码文件或编码表打开失败！\n";
         return;
@@ -164,15 +188,25 @@ void DeCode(string path) {
     string res = "";
     char ch;
     while (fCode.get(ch)) {
-        res += ch;
-        for (int i = 0; i < k; i++) {
-            if (res == tempTable[i].code) {
-                fRec << tempTable[i].data;
-                res = "";
-                break;
+        if (!fCode.eof()) {}
+        for (int j = 0; j < 8; j++) {
+            //与运算，一个个位读取
+            if (ch & 128) {
+                res += "1";
+            } else {
+                res += "0";
             }
+            for (int i = 0; i < k; i++) {
+                if (res == tempTable[i].code) {
+                    fRec << tempTable[i].data;  //写入
+                    res = "";
+                    break;
+                }
+            }
+            ch = ch << 1; //左移一位
         }
     }
+
     cout << "\n解码完成!" << endl;
     cout << "解码文件：" + path + "/recovery.txt" << endl;
 
@@ -181,14 +215,16 @@ void DeCode(string path) {
     fRec.close();
 }
 
-
 //遍历统计结果
 void ShowCode(HTNode *Forest[], int len) {
+    int WPL = 0;
     for (int i = 0; i < len; i++) {
-        cout << "字符：" << Forest[i]->data << "\t"
-             << "权重：" << Forest[i]->weight << "\t"
+        cout << "字符：" << Forest[i]->data << " \t"
+             << "权重：" << Forest[i]->weight << " \t"
              << "编码：" << Forest[i]->code << endl;
+        WPL += Forest[i]->weight * Forest[i]->code.length();
     }
+    cout << "\n最小带权路径长度：WPL = " << WPL << endl;
 }
 
 
